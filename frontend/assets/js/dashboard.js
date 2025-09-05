@@ -58,7 +58,7 @@
         if (!pendingFile && v) {
             addUserMessage(v);
             promptInput.value = '';
-            fetch('http://127.0.0.1:3004/api/chat', {
+            fetch('http://31.97.41.27:3004/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: v })
@@ -108,7 +108,7 @@
                 return;
             }
 
-            fetch('http://127.0.0.1:3004' + endpoint, {
+            fetch('http://31.97.41.27:3004' + endpoint, {
                 method: 'POST',
                 body: formData
             })
@@ -257,7 +257,7 @@
 
             // Fetch courses from backend and populate dropdown
             function loadCourses() {
-              fetch('http://127.0.0.1:3004/api/courses?teacherId=' + localStorage.getItem('teacherId'))
+              fetch('http://31.97.41.27:3004/api/courses?teacherId=' + localStorage.getItem('teacherId'))
                 .then(r => r.json())
                 .then(j => {
                   if (j.ok && Array.isArray(j.courses)) {
@@ -269,7 +269,7 @@
 
             // Fetch students for a course from backend and populate dropdown
             function loadStudents(courseId) {
-              fetch('http://127.0.0.1:3004/api/courses/' + courseId + '/students')
+              fetch('http://31.97.41.27:3004/api/courses/' + courseId + '/students')
                 .then(r => r.json())
                 .then(j => {
                   if (j.ok && Array.isArray(j.students)) {
@@ -337,7 +337,7 @@
         }).catch(err => console.error('Failed to open DB:', err));
         // If local DB had no chats, try server fallback
     const teacherId = localStorage.getItem('teacherId');
-    fetch(`http://127.0.0.1:3004/api/chats?teacherId=${teacherId}`)
+    fetch(`http://31.97.41.27:3004/api/chats?teacherId=${teacherId}`)
         .then (r=>r.json())
         .then(j=>{
             if(j && j.ok && Array.isArray(j.chats) && j.chats.length){
@@ -482,7 +482,7 @@
                     return saveQuizToIDB(finalEntry).then(()=> finalEntry);
                 }).then(finalEntry => {
                     // Try to POST the finalized quiz to the server so other browsers can fetch it
-                    const serverUrl = 'http://127.0.0.1:3004/api/quizzes';
+                    const serverUrl = 'http://31.97.41.27:3004/api/quizzes';
                     const form = new FormData();
                     form.append('id', finalEntry.id);
                     form.append('finalizedJson', JSON.stringify(edited));
@@ -538,7 +538,7 @@
     // Persist a quiz draft/finalizedJson to the server (best-effort)
     function saveQuizDraftToServer(quizId, finalizedJson){
         try{
-            const serverUrl = 'http://127.0.0.1:3004/api/quizzes';
+            const serverUrl = 'http://31.97.41.27:3004/api/quizzes';
             const teacherId = localStorage.getItem('teacherId');
             // send as JSON (no file) for drafts
             return fetch(serverUrl, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id: quizId, finalizedJson: finalizedJson, metadata: { title: finalizedJson.title || null }, teacherId }) }).then(r=>r.json());
