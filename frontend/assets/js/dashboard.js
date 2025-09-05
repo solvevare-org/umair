@@ -58,7 +58,7 @@
         if (!pendingFile && v) {
             addUserMessage(v);
             promptInput.value = '';
-            fetch('http://31.97.41.27:3004/api/chat', {
+            fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: v })
@@ -108,7 +108,7 @@
                 return;
             }
 
-            fetch('http://31.97.41.27:3004' + endpoint, {
+            fetch(endpoint, {
                 method: 'POST',
                 body: formData
             })
@@ -226,7 +226,7 @@
     // Also try to persist chat to server (best-effort)
     function saveChatMessageToServer(msg){
         try{
-            const serverUrl = 'http://31.97.41.27:3004/api/chats';
+            const serverUrl = '/api/chats';
             const teacherId = localStorage.getItem('teacherId');
             const payload = Object.assign({}, msg, { teacherId });
             return fetch(serverUrl, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) }).then(r=>r.json());
@@ -257,7 +257,7 @@
 
             // Fetch courses from backend and populate dropdown
             function loadCourses() {
-              fetch('http://31.97.41.27:3004/api/courses?teacherId=' + localStorage.getItem('teacherId'))
+              fetch('/api/courses?teacherId=' + localStorage.getItem('teacherId'))
                 .then(r => r.json())
                 .then(j => {
                   if (j.ok && Array.isArray(j.courses)) {
@@ -269,7 +269,7 @@
 
             // Fetch students for a course from backend and populate dropdown
             function loadStudents(courseId) {
-              fetch('http://31.97.41.27:3004/api/courses/' + courseId + '/students')
+              fetch('/api/courses/' + courseId + '/students')
                 .then(r => r.json())
                 .then(j => {
                   if (j.ok && Array.isArray(j.students)) {
