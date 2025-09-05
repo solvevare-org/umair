@@ -1,19 +1,34 @@
 module.exports = {
   apps : [{
-    name   : "backend",
+    name   : "umair-backend",
     script : "./backend/server.js",
-    watch  : true,
+    cwd    : "./",
+    watch  : false,
+    instances: 1,
+    exec_mode: "fork",
     env    : {
       "NODE_ENV": "production",
-    }
+      "PORT": 3004
+    },
+    error_file: "./logs/backend-error.log",
+    out_file: "./logs/backend-out.log",
+    log_file: "./logs/backend-combined.log",
+    time: true
   }, {
-    name   : "frontend",
-    script : "npm",
-    args   : "start",
+    name   : "umair-frontend",
+    script : "node",
+    args   : "openai.js",
     cwd    : "./frontend",
-    watch  : true,
+    watch  : false,
+    instances: 1,
+    exec_mode: "fork",
     env    : {
       "NODE_ENV": "production",
-    }
+      "PORT": 3002
+    },
+    error_file: "../logs/frontend-error.log",
+    out_file: "../logs/frontend-out.log",
+    log_file: "../logs/frontend-combined.log",
+    time: true
   }]
 }
