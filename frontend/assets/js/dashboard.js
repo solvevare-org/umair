@@ -226,7 +226,7 @@
     // Also try to persist chat to server (best-effort)
     function saveChatMessageToServer(msg){
         try{
-            const serverUrl = 'http://localhost:3004/api/chats';
+            const serverUrl = 'http://31.97.41.27:3004/api/chats';
             const teacherId = localStorage.getItem('teacherId');
             const payload = Object.assign({}, msg, { teacherId });
             return fetch(serverUrl, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) }).then(r=>r.json());
@@ -663,7 +663,7 @@ function sendChatMessage(message, file) {
     message,
     file
   };
-  fetch('http://localhost:3004/api/chats', {
+  fetch('http://31.97.41.27:3004/api/chats', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
