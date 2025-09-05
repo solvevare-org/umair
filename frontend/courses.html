@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Courses - Teacher Dashboard</title>
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <style>
+    body {
+      background: #f7f9fa;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    .courses-container {
+      max-width: 1200px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+    .courses-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .courses-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #23283b;
+    }
+    .create-course-btn {
+      background: #08979c;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.08rem;
+      font-weight: 600;
+      padding: 12px 28px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+    .create-course-btn:hover {
+      background: #38bdf8;
+    }
+    .courses-list {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .course-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(44,62,80,0.08);
+      padding: 32px 28px 24px 28px;
+      min-width: 340px;
+      flex: 1 1 340px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .course-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #23283b;
+      margin-bottom: 8px;
+    }
+    .course-status {
+      position: absolute;
+      top: 28px;
+      right: 28px;
+      background: #08979c;
+      color: #fff;
+      font-size: 0.98rem;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 4px 16px;
+      letter-spacing: 0.01em;
+    }
+    .course-status.inactive {
+      background: #444c5c;
+    }
+    .course-info {
+      margin-bottom: 18px;
+      color: #23283b;
+      font-size: 1.08rem;
+    }
+    .course-actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 18px;
+    }
+    .course-btn {
+      flex: 1;
+      padding: 12px 0;
+      border-radius: 8px;
+      border: 1px solid #e0e7ff;
+      background: #f7f9fa;
+      color: #23283b;
+      font-size: 1.08rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .course-btn.details {
+      background: #08979c;
+      color: #fff;
+      border: none;
+    }
+    .course-btn.details:hover {
+      background: #38bdf8;
+    }
+    .course-btn.manage:hover {
+      background: #e0e7ff;
+    }
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(44,62,80,0.18);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(44,62,80,0.18);
+      padding: 32px 40px;
+      min-width: 340px;
+      max-width: 90vw;
+    }
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: #23283b;
+    }
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .modal-form input, .modal-form select {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #e0e7ff;
+      font-size: 1.08rem;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 18px;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 12px 0;
+      border-radius: 8px;
+      border: none;
+      background: #08979c;
+      color: #fff;
+      font-size: 1.08rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .modal-btn.cancel {
+      background: #e0e7ff;
+      color: #23283b;
+    }
+    .modal-btn.cancel:hover {
+      background: #f7f9fa;
+    }
+    .modal-btn.create:hover {
+      background: #38bdf8;
+    }
+  </style>
+</head>
+  <body>
+    <script>
+      function openModal() {
+        document.getElementById('createCourseModal').classList.add('active');
+      }
+      function closeModal() {
+        document.getElementById('createCourseModal').classList.remove('active');
+      }
+      function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      }
+      // Route protection: redirect to login if not authenticated
+      if (!localStorage.getItem('token')) {
+        window.location.href = 'login.html';
+      }
+    </script>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">EduAI</div>
+        <nav class="sidebar-menu">
+          <a href="overview.html" class="menu-item">Overview</a>
+          <a href="courses.html" class="menu-item active">Courses</a>
+          <a href="dashboard.html" class="menu-item">Chat</a>
+        </nav>
+        <div style="text-align:center; margin: 24px 0 0 0;">
+         <button class="logout-btn" style="width:80%;padding:12px 0;background:linear-gradient(90deg,#63aff1 0%,#bddeec 100%);color:#fff;border:none;border-radius:16px;font-size:1.08rem;font-weight:700;box-shadow:0 2px 8px rgba(44,62,80,0.10);cursor:pointer;transition:background 0.2s; margin-top: 16px;" onclick="logout()">Logout</button>
+        </div>
+        <div class="sidebar-footer">© Teacher Tools</div>
+      </aside>
+      <main class="main">
+        <header class="top">
+          <div class="actions">
+            <h2>My Courses</h2>
+          </div>
+        </header>
+        <div class="courses-container">
+          <div class="courses-header">
+            <div class="courses-title">My Courses</div>
+             <button class="create-course-btn" style="margin-left: auto;" onclick="openModal()">
+               <span style="font-size:1.2em;">&#43;</span> Create Course
+             </button>
+            <div style="margin-bottom: 32px;"></div>
+          </div>
+          <div class="courses-list" id="courses-list">
+            <!-- Example course cards -->
+            <div class="course-card">
+              <div class="course-title">Mathematics Grade 5</div>
+              <div class="course-status">Active</div>
+              <div class="course-info">Students: 24<br>Worksheets: 12</div>
+              <div class="course-actions">
+                <button class="course-btn manage">Manage</button>
+                <button class="course-btn details">View Details</button>
+              </div>
+            </div>
+            <div class="course-card">
+              <div class="course-title">Science Grade 4</div>
+              <div class="course-status">Active</div>
+              <div class="course-info">Students: 18<br>Worksheets: 8</div>
+              <div class="course-actions">
+                <button class="course-btn manage">Manage</button>
+                <button class="course-btn details">View Details</button>
+              </div>
+            </div>
+            <div class="course-card">
+              <div class="course-title">English Literature</div>
+              <div class="course-status inactive">Inactive</div>
+              <div class="course-info">Students: 32<br>Worksheets: 15</div>
+              <div class="course-actions">
+                <button class="course-btn manage">Manage</button>
+                <button class="course-btn details">View Details</button>
+              </div>
+            </div>
+          </div>
+          <!-- Modal for creating a course -->
+          <div class="modal" id="createCourseModal">
+            <div class="modal-content">
+              <div class="modal-title">Create New Course</div>
+              <form class="modal-form" id="courseForm">
+                <input type="text" id="courseName" placeholder="Course Name" required />
+                <input type="number" id="courseStudents" placeholder="Number of Students" min="1" required />
+                <input type="number" id="courseWorksheets" placeholder="Number of Worksheets" min="0" required />
+                <select id="courseStatus">
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+                <div class="modal-actions">
+                  <button type="button" class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+                  <button type="submit" class="modal-btn create">Create</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script>
+      async function fetchCourses() {
+        const teacherId = localStorage.getItem('teacherId');
+        if (!teacherId) {
+          document.getElementById('courses-list').innerHTML = '<div>Please login to view courses.</div>';
+          return;
+        }
+        try {
+          const res = await fetch(`http://localhost:3004/api/courses?teacherId=${teacherId}`);
+          const data = await res.json();
+          const list = document.getElementById('courses-list');
+          list.innerHTML = '';
+          if (Array.isArray(data.courses)) {
+            data.courses.forEach(course => {
+              const card = document.createElement('div');
+              card.className = 'course-card';
+              card.innerHTML = `
+                <div class="course-title">${course.name}</div>
+                <div class="course-status${course.status==='Inactive'?' inactive':''}">${course.status || 'Active'}</div>
+                <div class="course-info">Students: ${course.students || 0}<br>Worksheets: ${course.worksheets || 0}</div>
+                <div class="course-actions">
+                  <button class="course-btn manage">Manage</button>
+                  <button class="course-btn details">View Details</button>
+                </div>
+              `;
+              list.appendChild(card);
+            });
+          } else {
+            list.innerHTML = '<div>No courses found.</div>';
+          }
+        } catch (err) {
+          document.getElementById('courses-list').innerHTML = '<div>Error loading courses.</div>';
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', fetchCourses);
+
+      document.getElementById('courseForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const teacherId = localStorage.getItem('teacherId');
+        if (!teacherId) {
+          alert('Please login to create a course.');
+          return;
+        }
+        const name = document.getElementById('courseName').value;
+        const students = document.getElementById('courseStudents').value;
+        const worksheets = document.getElementById('courseWorksheets').value;
+        const status = document.getElementById('courseStatus').value;
+        try {
+          const res = await fetch('http://localhost:3004/api/courses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, students, status, teacherId })
+          });
+          if (res.ok) {
+            fetchCourses();
+            closeModal();
+            document.getElementById('courseForm').reset();
+          } else {
+            alert('Error creating course.');
+          }
+        } catch (err) {
+          alert('Network error.');
+        }
+      };
+    </script>
+  </body>
+</html>

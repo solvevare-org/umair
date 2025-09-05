@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Math Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 0;
+            color: #222;
+        }
+        .container {
+            max-width: 600px;
+            margin: 32px auto;
+            padding: 16px;
+        }
+        header {
+            text-align: center;
+            background: white;
+            padding: 24px 16px 16px 16px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(44,107,174,0.08);
+            margin-bottom: 24px;
+        }
+        h1 {
+            color: #2c6bae;
+            margin: 0 0 8px 0;
+            font-size: 2rem;
+        }
+        .subtitle {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+        .card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(44,107,174,0.07);
+            margin: 18px 0;
+            padding: 20px 16px;
+            transition: box-shadow 0.2s;
+        }
+        .card:not(:last-child) {
+            margin-bottom: 24px;
+        }
+        .input-area {
+            margin-top: 16px;
+            position: relative;
+            border: 1px solid #e0e0e0;
+            padding: 16px;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        input[type="email"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 7px;
+            border: 1px solid #bfc8d6;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, textarea:focus {
+            border-color: #2c6bae;
+            box-shadow: 0 0 0 2px #e3f0fc;
+            outline: none;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 7px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-right: 8px;
+            font-size: 1rem;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+        button:hover, button:focus {
+            background-color: #45a049;
+            box-shadow: 0 2px 8px rgba(44,107,174,0.10);
+        }
+        .content {
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            margin: 18px 0;
+        }
+        .content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(44,107,174,0.07);
+        }
+        #quizContent {
+            display: none;
+        }
+        .summary {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(44,107,174,0.08);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .feedback {
+            display: none;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 7px;
+            font-size: 1rem;
+        }
+        .saved-indicator {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            font-size: 13px;
+            color: #4CAF50;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .saved {
+            opacity: 1;
+        }
+        .score-display {
+            text-align: center;
+            font-size: 1.3rem;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #e8f5e9;
+            border-radius: 10px;
+        }
+        @media (max-width: 700px) {
+            .container {
+                max-width: 100%;
+                padding: 8px;
+            }
+            header, .card, .input-area, .content {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Money Math Quiz</h1>
+        
+        <!-- Email Entry Form -->
+        <div id="emailForm" class="card">
+            <h2>Enter your email to start the quiz</h2>
+            <input type="email" id="studentEmail" placeholder="Enter your email" required />
+            <button onclick="startQuiz()">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Content -->
+        <div id="quizContent"></div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentQuizId = null;
+        let currentStudentEmail = null;
+        
+        // Initialize on page load
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentQuizId = urlParams.get('id');
+            
+            if (!currentQuizId) {
+                document.getElementById('emailForm').innerHTML = `
+                    <h2>Error</h2>
+                    <p>No quiz ID found. Please make sure you're using the correct link.</p>
+                `;
+                return;
+            }
+            
+            // Check if student email is already stored
+            const savedEmail = localStorage.getItem('student_email');
+            if (savedEmail) {
+                document.getElementById('studentEmail').value = savedEmail;
+                currentStudentEmail = savedEmail;
+            }
+        };
+
+        // Backend API functions
+    const SERVER_URL = "http://localhost:3004";
+
+        // Save or update a single answer
+        async function saveAnswer(quizId, email, questionId, answer, status = 'incomplete') {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/attempts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quizId, email, answers: { [questionId]: answer }, progress: { [questionId]: status } })
+                });
+                // Update the saved indicator
+                const indicator = document.getElementById(`indicator-${questionId}`);
+                if (indicator) {
+                    indicator.classList.add('saved');
+                    setTimeout(() => indicator.classList.remove('saved'), 2000);
+                }
+                return response.ok;
+            } catch (error) {
+                console.error('Error saving answer:', error);
+                return false;
+            }
+        }
+
+        // Get all answers for a student and quiz
+        async function getStudentAnswers(quizId, email) {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/attempts?quizId=${quizId}&email=${email}`);
+                if (response.status === 404) return {}; // treat as no attempt yet
+                if (!response.ok) return {};
+                const result = await response.json();
+                if (result.ok && result.attempt) {
+                    const answers = result.attempt.answers || {};
+                    const progress = result.attempt.progress || {};
+                    // Merge answers and progress for frontend compatibility
+                    const answersMap = {};
+                    Object.keys(answers).forEach(qid => {
+                        answersMap[qid] = {
+                            answer: answers[qid],
+                            status: progress[qid] || 'incomplete'
+                        };
+                    });
+                    return answersMap;
+                }
+                return {};
+            } catch (error) {
+                console.error('Error retrieving answers:', error);
+                return {};
+            }
+        }
+
+        // Save quiz attempt metadata
+        async function saveQuizAttempt(quizId, email, data, score, totalQuestions) {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/attempts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quizId, email, score, totalQuestions, ...data })
+                });
+                return response.ok;
+            } catch (error) {
+                console.error('Error saving quiz attempt:', error);
+                return false;
+            }
+        }
+
+        // Get quiz attempt metadata
+        async function getQuizAttempt(quizId, email) {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/attempts?quizId=${quizId}&email=${email}`);
+                if (response.status === 404) return null; // treat as no attempt yet
+                if (!response.ok) return null;
+                const result = await response.json();
+                if (result.ok && result.attempt) return result.attempt;
+                return null;
+            } catch (error) {
+                console.error('Error retrieving quiz attempt:', error);
+                return null;
+            }
+        }
+
+        // Start the quiz
+        async function startQuiz() {
+            const emailInput = document.getElementById('studentEmail');
+            const email = emailInput.value.trim();
+            
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            // Save email
+            localStorage.setItem('student_email', email);
+            currentStudentEmail = email;
+
+            
+            // Check if quiz is already submitted
+            const attempt = await getQuizAttempt(currentQuizId, email);
+            console.log(attempt);
+            if (attempt && attempt.submitted === true) {
+                showQuizResults(attempt);
+                return;
+            }
+            
+            // Hide email form
+            document.getElementById('emailForm').style.display = 'none';
+            
+            // Load quiz data
+            const quizData = await loadQuizData(currentQuizId);
+            if (!quizData) {
+                alert('Quiz not found!');
+                return;
+            }
+            
+            // Render quiz content
+            renderQuizContent(quizData);
+            
+            // Load and populate saved answers
+            await populateSavedAnswers();
+            
+            // Show quiz content
+            document.getElementById('quizContent').style.display = 'block';
+        }
+
+        // Load quiz data
+        async function loadQuizData(quizId) {
+            // In a real implementation, this would fetch from a server
+            // For this example, we'll use hardcoded data matching your original questions
+            // Try to fetch quiz definition from backend
+            try {
+                const response = await fetch(`${SERVER_URL}/api/quizzes/${quizId}`);
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.ok && result.quiz) {
+                        // If fileUrl is present, use it for image/pdf
+                        let content = null;
+                        if (result.fileUrl) {
+                            const ext = result.fileUrl.split('.').pop().toLowerCase();
+                            if (ext === 'pdf') {
+                                content = { type: 'pdf', src: result.fileUrl };
+                            } else {
+                                content = { type: 'image', src: result.fileUrl };
+                            }
+                        } else if (result.quiz.finalizedJson && result.quiz.finalizedJson.content) {
+                            content = result.quiz.finalizedJson.content;
+                        } else {
+                            content = { type: 'image', src: "https://via.placeholder.com/600x400?text=Money+Worksheet" };
+                        }
+                        return {
+                            id: quizId,
+                            title: result.quiz.finalizedJson && result.quiz.finalizedJson.title ? result.quiz.finalizedJson.title : "Money Math Quiz",
+                            content,
+                            questions: result.quiz.finalizedJson && result.quiz.finalizedJson.questions ? result.quiz.finalizedJson.questions : [
+                    {
+                        id: "q1",
+                        prompt: "You have 2 quarters, 1 dime, 3 nickels, and 2 pennies. How much money do you have?",
+                        type: "text"
+                    },
+                    {
+                        id: "q2",
+                        prompt: "List three different ways to make 90¢ using quarters, dimes, and nickels.",
+                        type: "textarea"
+                    },
+                    {
+                        id: "q3",
+                        prompt: "If you have 3 quarters, 2 dimes, and 2 pennies, how much money do you have?",
+                        type: "text"
+                    }
+                            ]
+                        };
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading quiz data from backend:', e);
+            }
+            // Fallback to hardcoded quiz if backend fails
+            return {
+                id: quizId,
+                title: "Money Math Quiz",
+                content: {
+                    type: "image",
+                    src: "https://via.placeholder.com/600x400?text=Money+Worksheet"
+                },
+                questions: [
+                    {
+                        id: "q1",
+                        prompt: "You have 2 quarters, 1 dime, 3 nickels, and 2 pennies. How much money do you have?",
+                        type: "text"
+                    },
+                    {
+                        id: "q2",
+                        prompt: "List three different ways to make 90¢ using quarters, dimes, and nickels.",
+                        type: "textarea"
+                    },
+                    {
+                        id: "q3",
+                        prompt: "If you have 3 quarters, 2 dimes, and 2 pennies, how much money do you have?",
+                        type: "text"
+                    }
+                ]
+            };
+        }
+
+        // Render quiz content
+        function renderQuizContent(quizData) {
+            // Debug: log loaded quiz data
+            console.log('Loaded quiz data:', quizData);
+            if (!quizData.questions || !Array.isArray(quizData.questions) || quizData.questions.length === 0) {
+                document.getElementById('quizContent').innerHTML += `<div class="card"><h2>No questions found in this quiz.</h2></div>`;
+                return;
+            }
+            // Store questions globally for hint lookup
+            window.currentQuizQuestions = quizData.questions;
+            window.currentQuizData = quizData; // Store the entire quiz data for later use
+            let html = '';
+            // Render quiz title
+            if (quizData.title) {
+                html += `
+                    <div class="card">
+                        <h2>${quizData.title}</h2>
+                    </div>
+                `;
+            }
+            // Render questions card and pagination controls
+            html += `<div class="card"><h2>Questions</h2><div id="questionsPage"></div></div>`;
+            html += `<div id="paginationControls" style="text-align:center;margin-top:16px;"></div>`;
+            // Add submit button ONCE
+            html += `
+                <div class="card">
+                    <button onclick="submitQuiz()" style="width: 100%; padding: 15px; font-size: 18px;">Submit Quiz</button>
+                </div>
+            `;
+            document.getElementById('quizContent').innerHTML = html;
+            let currentPage = 0;
+            const pageSize = 5;
+            function renderPage() {
+                const questionsDiv = document.getElementById('questionsPage');
+                if (!questionsDiv) return;
+                questionsDiv.innerHTML = '';
+                const start = currentPage * pageSize;
+                const end = Math.min(start + pageSize, quizData.questions.length);
+                for(let index = start; index < end; index++) {
+                    const question = quizData.questions[index];
+                    if (!question.id) question.id = `q${index + 1}`;
+                    const inputType = question.type === 'textarea' ? 'textarea' : 'input';
+                    let inputElement = '';
+                    let savedAnswers = window.savedAnswers || {};
+                    let checked = savedAnswers[question.id] && (savedAnswers[question.id].status === 'correct' || savedAnswers[question.id].status === 'incorrect');
+                    if (inputType === 'textarea') {
+                        inputElement = `<textarea id="${question.id}" placeholder="Enter your answer" ${checked ? 'readonly disabled' : ''}></textarea>`;
+                    } else {
+                        inputElement = `<input type="text" id="${question.id}" placeholder="Enter your answer" ${checked ? 'readonly disabled' : ''} />`;
+                    }
+                    questionsDiv.innerHTML += `
+                        <div class="input-area" id="input-area-${question.id}">
+                            <div style="font-weight:500; margin-bottom:8px;">${question.question || question.prompt || ''}</div>
+                            ${inputElement}
+                            <span class="saved-indicator" id="indicator-${question.id}">Saved</span>
+                            <div style="margin-top:8px;">
+                                <button id="checkBtn-${question.id}" ${checked ? 'disabled' : ''}>Check</button>
+                                <button id="hintBtn-${question.id}" ${checked ? 'disabled' : ''}>Hint</button>
+                            </div>
+                            <div class="feedback" id="feedback-${question.id}"></div>
+                        </div>
+                    `;
+                }
+                // Add input listeners for auto-saving and button listeners for each question
+                quizData.questions.slice(start, end).forEach(question => {
+                    const element = document.getElementById(question.id);
+                    if (element && !element.disabled) {
+                        let timeout;
+                        element.addEventListener('input', () => {
+                            clearTimeout(timeout);
+                            timeout = setTimeout(() => {
+                                saveAnswer(currentQuizId, currentStudentEmail, question.id, element.value);
+                            }, 1000);
+                });
+                    }
+                    // Add event listeners for Check and Hint buttons
+                    const checkBtn = document.getElementById(`checkBtn-${question.id}`);
+                    if (checkBtn) {
+                        checkBtn.onclick = function() { checkAnswer(question.id); };
+                    }
+                    const hintBtn = document.getElementById(`hintBtn-${question.id}`);
+                    if (hintBtn) {
+                        hintBtn.onclick = function() { aiHelp(question.id); };
+                    }
+                });
+            }
+            function updatePaginationControls() {
+                const controlsDiv = document.getElementById('paginationControls');
+                if (!controlsDiv) return;
+                controlsDiv.innerHTML = '';
+                const prevBtn = document.createElement('button');
+                prevBtn.textContent = 'Previous';
+                prevBtn.disabled = currentPage === 0;
+                prevBtn.onclick = function() {
+                    if(currentPage > 0) {
+                        currentPage--;
+                        renderPage();
+                        updatePaginationControls();
+                    }
+                };
+                const nextBtn = document.createElement('button');
+                nextBtn.textContent = 'Next';
+                nextBtn.disabled = (currentPage + 1) * pageSize >= quizData.questions.length;
+                nextBtn.onclick = function() {
+                    if((currentPage + 1) * pageSize < quizData.questions.length) {
+                        currentPage++;
+                        renderPage();
+                        updatePaginationControls();
+                    }
+                };
+                controlsDiv.appendChild(prevBtn);
+                controlsDiv.appendChild(nextBtn);
+            }
+            renderPage();
+            updatePaginationControls();
+        }
+
+        // Populate saved answers
+        async function populateSavedAnswers() {
+            const answers = await getStudentAnswers(currentQuizId, currentStudentEmail);
+            window.savedAnswers = answers;
+            Object.keys(answers).forEach(questionId => {
+                const element = document.getElementById(questionId);
+                if (element) {
+                    element.value = answers[questionId].answer;
+                    // If the answer was previously checked, show the feedback
+                    if (answers[questionId].status === 'correct' || answers[questionId].status === 'incorrect') {
+                        showFeedback(questionId, answers[questionId].status, answers[questionId].answer);
+                        // Make input read-only if checked
+                        element.readOnly = true;
+                        element.disabled = true;
+                        // Disable buttons
+                        const parent = element.parentElement;
+                        if (parent) {
+                            const checkBtn = parent.querySelector(`button[onclick=\"checkAnswer('${questionId}')\"]`);
+                            const hintBtn = parent.querySelector(`button[onclick=\"aiHelp('${questionId}')\"]`);
+                            if (checkBtn) checkBtn.disabled = true;
+                            if (hintBtn) hintBtn.disabled = true;
+                        }
+                    }
+                }
+            });
+        }
+
+        // Check answer
+        async function checkAnswer(questionId) {
+            const answerInput = document.getElementById(questionId);
+            const answer = answerInput.value.trim();
+            const feedback = document.getElementById(`feedback-${questionId}`);
+            const checkBtn = feedback.parentElement.querySelector(`button[onclick="checkAnswer('${questionId}')"]`);
+            const hintBtn = feedback.parentElement.querySelector(`button[onclick="aiHelp('${questionId}')"]`);
+            if (!answer) {
+                feedback.style.display = 'block';
+                feedback.style.background = '#fff3e0';
+                feedback.innerHTML = 'Please enter an answer first.';
+                return;
+            }
+            // Disable buttons and make input readonly
+            if (checkBtn) checkBtn.disabled = true;
+            if (hintBtn) hintBtn.disabled = true;
+            if (answerInput) { answerInput.readOnly = true; answerInput.disabled = true; }
+
+            // Get question data from quizData
+            const quizData = window.currentQuizData;
+            const question = quizData.questions.find(q => q.id === questionId);
+            let isCorrect = false;
+            let explanation = question && question.explanation ? question.explanation : '';
+            let correct = question && question.correct ? question.correct : null;
+            let acceptable = question && question.acceptable ? question.acceptable : [];
+
+            // Clean up answer for comparison
+            const cleanAnswer = answer.replace(/[$¢\s]/g, '').replace(/\./g, '').replace(/cents/i, '');
+
+            if (!correct) {
+                // No auto-check logic, just save as checked and show generic feedback
+                await saveAnswer(currentQuizId, currentStudentEmail, questionId, answer, 'checked');
+                feedback.style.display = 'block';
+                feedback.style.background = '#fff3e0';
+                feedback.innerHTML = 'Your answer has been saved and locked. No auto-check available for this question.';
+                return;
+            }
+
+            if (Array.isArray(correct)) {
+                isCorrect = correct.some(ans => 
+                    answer.toLowerCase().includes(ans.toLowerCase())
+                ) || acceptable.some(acc => 
+                    cleanAnswer === acc.replace(/[$¢\s]/g, '').replace(/\./g, '').replace(/cents/i, '')
+                );
+            } else {
+                isCorrect = cleanAnswer === correct ||
+                    acceptable.some(acc => 
+                        cleanAnswer === acc.replace(/[$¢\s]/g, '').replace(/\./g, '').replace(/cents/i, '')
+                    );
+            }
+            await saveAnswer(
+                currentQuizId, 
+                currentStudentEmail, 
+                questionId, 
+                answer, 
+                isCorrect ? 'correct' : 'incorrect'
+            );
+            showFeedback(questionId, isCorrect ? 'correct' : 'incorrect', answer);
+        }
+
+        // Show feedback for an answer
+        function showFeedback(questionId, status, answer) {
+            const feedback = document.getElementById(`feedback-${questionId}`);
+            feedback.style.display = 'block';
+            const quizData = window.currentQuizData;
+            const question = quizData.questions.find(q => q.id === questionId);
+            let explanation = question && question.explanation ? question.explanation : '';
+            if (!question || !question.correct) {
+                feedback.style.background = '#fff3e0';
+                feedback.innerHTML = 'Your answer is saved and locked. No auto-check available for this question.';
+                return;
+            }
+            if (status === 'correct') {
+                feedback.style.background = '#e8f5e9';
+                feedback.innerHTML = `
+                    <span style="color: #2e7d32">✓ Correct!</span><br>
+                    ${explanation}
+                `;
+            } else {
+                feedback.style.background = '#ffebee';
+                feedback.innerHTML = `
+                    <span style="color: #c62828">✗ Not quite right. Try again!</span><br>
+                    Hint: ${explanation ? explanation.split(':')[0] : ''}
+                `;
+            }
+        }
+
+        // AI Help function
+        function aiHelp(questionId) {
+            const hints = {
+                'q1': 'Count the value of each coin type separately, then add them together. Remember: quarter=25¢, dime=10¢, nickel=5¢, penny=1¢',
+                'q2': 'Start with quarters (25¢) and work your way down to pennies. Try different combinations.',
+                'q3': 'Break it down: First calculate quarters (3×25¢), then dimes (2×10¢), finally add pennies (2×1¢)'
+            };
+            const feedback = document.getElementById(`feedback-${questionId}`);
+            feedback.style.display = 'block';
+            feedback.style.background = '#fff3e0';
+            // Find the question object from the rendered quiz
+            let questionObj = null;
+            if (window.currentQuizQuestions) {
+                questionObj = window.currentQuizQuestions.find(q => q.id === questionId);
+            }
+            let hintText = hints[questionId];
+            if (!hintText && questionObj) {
+                hintText = questionObj.hint || questionObj.question || questionObj.prompt || 'No hint available.';
+            }
+            if (!hintText) {
+                hintText = 'Think about the value of each coin and add them together.';
+            }
+            feedback.innerHTML = hintText;
+        }
+
+        // Submit quiz
+        async function submitQuiz() {
+            // Calculate score
+            const answers = await getStudentAnswers(currentQuizId, currentStudentEmail);
+            let score = 0;
+            // Get total number of questions from quiz definition
+            const quizData = await loadQuizData(currentQuizId);
+            let totalQuestions = quizData.questions.length;
+            quizData.questions.forEach(q => {
+                if (answers[q.id] && answers[q.id].status === 'correct') {
+                    score++;
+                }
+            });
+
+            // Save quiz attempt as submitted
+            await saveQuizAttempt(currentQuizId, currentStudentEmail, {
+                submitted: true,
+                score,
+                totalQuestions,
+                submittedAt: new Date().toISOString()
+            });
+
+            // Show results
+            showQuizResults({
+                quizId: currentQuizId,
+                email: currentStudentEmail,
+                score,
+                totalQuestions,
+                score,
+                totalQuestions,
+                submitted: true,
+                submittedAt: new Date().toISOString()
+            });
+        }
+
+        // Show quiz results
+        function showQuizResults(attempt) {
+            console.log('Quiz attempt results:', attempt);
+            const percentage = Math.round((attempt.score / attempt.totalQuestions) * 100);
+            document.getElementById('quizContent').innerHTML = `
+                <div class="card">
+                    <h2>Quiz Submitted!</h2>
+                    <div class="score-display">
+                        <div style="font-size: 48px; color: #4CAF50;">${percentage}%</div>
+                        <p>Score: ${attempt.score} out of ${attempt.totalQuestions} correct</p>
+                        <p>Submitted: ${new Date(attempt.submittedAt).toLocaleString()}</p>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <p>Thank you for completing the quiz. Your responses have been saved.</p>
+                        <p>If you return with the same email, you'll see these results instead of the quiz questions.</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('quizContent').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

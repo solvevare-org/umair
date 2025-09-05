@@ -1,0 +1,38 @@
+/* Modern, minimal stylesheet for index.html */
+:root{
+  --bg:#f7fafc;
+  --card:#ffffff;
+  --muted:#6b7280;
+  --accent:#0ea5e9;
+  --success:#16a34a;
+  --radius:12px;
+  --maxw:980px;
+  --glass: rgba(255,255,255,0.65);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#0f172a}
+.container{max-width:var(--maxw);margin:32px auto;padding:20px}
+.header{display:flex;flex-direction:column;align-items:center;gap:8px}
+.header h1{margin:0;font-size:1.6rem;color:var(--accent);letter-spacing:0.2px}
+.header p{margin:0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
+@media(min-width:900px){.grid{grid-template-columns:1fr 420px}}
+.card{background:linear-gradient(180deg, var(--card), var(--glass));border-radius:var(--radius);box-shadow:0 6px 20px rgba(2,6,23,0.06);padding:18px;border:1px solid rgba(2,6,23,0.04);transition:transform .18s ease,box-shadow .18s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(2,6,23,0.08)}
+.card h2{margin:0 0 8px 0;font-size:1.05rem}
+.lead{color:var(--muted);font-size:0.95rem}
+.input-area{margin-top:10px}
+input[type="text"],textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);background:transparent}
+.input-row{display:flex;gap:8px;align-items:center;margin-top:10px}
+.btn{display:inline-flex;gap:8px;align-items:center;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;background:var(--accent);color:white;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(14,165,233,0.12)}
+.btn.secondary{background:var(--success)}
+.small{font-size:0.9rem;color:var(--muted)}
+.summary{display:none;margin-top:12px}
+.nav{text-align:center;margin-top:14px}
+.nav .btn{padding:10px 16px;border-radius:999px}
+.feedback{margin-top:6px;color:var(--muted);font-size:0.95rem}
+.footer{margin-top:22px;text-align:center;color:var(--muted);font-size:0.9rem}
+/* Utility */
+.row{display:flex;gap:12px}
+.center{display:flex;align-items:center;justify-content:center}

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Teacher Dashboard</title>
+        <link rel="stylesheet" href="assets/css/dashboard.css" />
+        <style>
+            :root {
+                --primary-bg: #f6f8fa;
+                --card-bg: #fff;
+                --accent: #08979c;
+                --accent-dark: #065a60;
+                --primary: #23283b;
+                --secondary: #444c5c;
+                --muted: #6b7280;
+                --border: #e0e7ff;
+                --shadow: 0 6px 32px rgba(44,62,80,0.10);
+            }
+            body {
+                background: var(--primary-bg);
+                color: var(--primary);
+                font-family: 'Inter', Arial, sans-serif;
+            }
+        </style>
+</head>
+<body>
+        <script>
+            // Route protection: redirect to login if not authenticated
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+            }
+        </script>
+        <div class="app">
+        <aside class="sidebar">
+        <div class="brand">EduAI</div>
+        <nav class="sidebar-menu">
+          <a href="overview.html" class="menu-item">Overview</a>
+          <a href="courses.html" class="menu-item">Courses</a>
+          <a href="dashboard.html" class="menu-item active">Chat</a>
+        </nav>
+        <div style="text-align:center; margin: 24px 0 0 0;">
+         <button class="logout-btn" style="width:80%;padding:12px 0;background:linear-gradient(90deg,#63aff1 0%,#bddeec 100%);color:#fff;border:none;border-radius:16px;font-size:1.08rem;font-weight:700;box-shadow:0 2px 8px rgba(44,62,80,0.10);cursor:pointer;transition:background 0.2s;">Logout</button>
+        </div>
+        <hr />
+        <div class="sidebar-footer">© Teacher Tools</div>
+      </aside>
+
+        <main class="main">
+            <header class="top">
+                <div class="actions">
+                     <h2>AI Teaching Assistant</h2>
+                <p class="sub">Ask questions about your course or upload materials for analysis</p>
+
+                </div>
+            </header>
+
+            <section class="content">
+               
+                <div id="chat" class="chat">
+                    <!-- initial assistant message -->
+                </div>
+
+                <!-- JSON Preview Box -->
+                <div id="jsonPreview" class="json-preview-box" style="display:none; margin-top:24px;"></div>
+
+                <!-- Preview modal for teacher to preview quiz -->
+                <div id="previewModal" class="modal" style="display:none">
+                    <div class="modal-content card-modal">
+                         <!-- Publish button and modal -->
+                               
+                        <button id="closePreview" class="close-btn">✕</button>
+                        <div id="previewArea"></div>
+                    </div>
+                </div>
+                                <div id="publishModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+                                    <div style="background:#fff; margin:5% auto; padding:20px; width:400px; border-radius:8px; position:relative;">
+                                        <h2>Publish Quiz</h2>
+                                        <div id="publishStep1">
+                                                                    <label for="courseSelect">Select Course:</label>
+                                                                    <select id="courseSelect" style="width:100%;margin-bottom:16px;">
+                                                                        <option value="">--Choose a course--</option>
+                                                                        <option value="Math">Math</option>
+                                                                        <option value="Science">Science</option>
+                                                                        <option value="History">History</option>
+                                                                        <option value="English">English</option>
+                                                                        <option value="Computer">Computer</option>
+                                                                        <option value="Biology">Biology</option>
+                                                                        <option value="Chemistry">Chemistry</option>
+                                                                        <option value="Physics">Physics</option>
+                                                                    </select>
+            
+                                                                    <button id="nextToStudents" style="background:#08979c; color:#fff; border:none; border-radius:8px; padding:8px 16px; cursor:pointer;">Next</button>
+                                        </div>
+                                        <div id="publishStep2" style="display:none;">
+                                            <label for="studentSelect">Select Students:</label>
+                                            <select id="studentSelect" multiple size="6" style="width:100%; margin-bottom:16px;"></select>
+                                            <button id="publishConfirm" style="background:#08979c; color:#fff; border:none; border-radius:8px; padding:8px 16px; cursor:pointer;">Publish</button>
+                                            <button id="backToCourse" style="margin-left:8px; background:#eee; color:#23283b; border:none; border-radius:8px; padding:8px 16px; cursor:pointer;">Back</button>
+                                        </div>
+                                        <button id="closePublishModal" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+                                    </div>
+                                </div>
+                               
+
+                <div class="composer">
+                    <input id="prompt" placeholder="Ask about your course, students, or upload materials..." />
+                    <button id="attachBtn" title="Attach file">📎</button>
+                    <button id="sendBtn">➤</button>
+                    <input id="fileInput" type="file" style="display:none" />
+                </div>
+            </section>
+        </main>
+        <!-- floating upload bubble -->
+        <div id="uploadBubble" class="upload-bubble toast" style="display:none">
+            <div class="file-info" id="bubbleFilename"></div>
+            <div class="file-size" id="bubbleSize"></div>
+            <div class="time" id="bubbleTime"></div>
+        </div>
+    </div>
+
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

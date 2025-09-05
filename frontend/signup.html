@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Signup</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+  <style>
+    body {
+      background: #f7f9fc;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+      padding: 40px 36px 32px 36px;
+      max-width: 370px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    h2 {
+      color: #23283b;
+      text-align: center;
+      margin-bottom: 24px;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 0.01em;
+    }
+    label {
+      color: #6c7a96;
+      font-size: 15px;
+      margin-bottom: 6px;
+      margin-top: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #e3e8f0;
+      background: #f7f9fc;
+      color: #23283b;
+      margin-bottom: 10px;
+      font-size: 16px;
+      transition: border 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border: 1.5px solid #38e8ff;
+      background: #fff;
+    }
+    .btn {
+      width: 100%;
+      background: linear-gradient(90deg,#38e8ff,#4f8cff);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: linear-gradient(90deg,#4f8cff,#38e8ff);
+    }
+    .switch-link {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: #38e8ff;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+    .switch-link:hover {
+      text-decoration: underline;
+      color: #23283b;
+    }
+    .error {
+      color: #ff4f4f;
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+    <h2>Teacher Signup</h2>
+    <form id="signupForm">
+      <div class="error" id="signupError" style="display:none;"></div>
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" required autocomplete="name" placeholder="Enter your name">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required autocomplete="username" placeholder="Enter your email">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required autocomplete="new-password" placeholder="Create a password">
+      <button type="submit" class="btn">Sign Up</button>
+    </form>
+    <a href="login.html" class="switch-link">Already have an account? Login</a>
+  </div>
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorDiv = document.getElementById('signupError');
+      errorDiv.style.display = 'none';
+      if (!name || !email || !password) {
+        errorDiv.textContent = 'Please fill in all fields.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+      try {
+        const res = await fetch('http://127.0.0.1:3004/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          if (data.user && data.user._id) {
+            localStorage.setItem('teacherId', data.user._id);
+          }
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+          }
+          window.location.href = 'dashboard.html';
+        } else {
+          errorDiv.textContent = data.error || 'Signup failed.';
+          errorDiv.style.display = 'block';
+        }
+      } catch (err) {
+        errorDiv.textContent = 'Network error. Please try again.';
+        errorDiv.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

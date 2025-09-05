@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Resource Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.01);
+        }
+        .upload-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            background: white;
+        }
+        .upload-section:hover {
+            border-color: #4CAF50;
+        }
+        .file-input-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .file-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .input-area {
+            margin-top: 10px;
+        }
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        textarea {
+            min-height: 100px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .file-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .content {
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .summary {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        #feedback-q1, #feedback-q2, #feedback-q3 {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .nav {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teacher Resource Upload</h1>
+        
+        <div class="upload-section">
+            <label class="file-input-label">Upload PDF Document</label>
+            <input type="file" 
+                   id="pdfUpload" 
+                   class="file-input" 
+                   accept=".pdf"
+                   onchange="handleFileSelect(this, 'pdfInfo')" />
+            <div id="pdfInfo" class="file-info"></div>
+        </div>
+
+        <div class="upload-section">
+            <label class="file-input-label">Upload Image</label>
+            <input type="file" 
+                   id="imageUpload" 
+                   class="file-input" 
+                   accept="image/*"
+                   onchange="handleFileSelect(this, 'imageInfo')" />
+            <div id="imageInfo" class="file-info"></div>
+        </div>
+
+        <button onclick="uploadFiles()">Generate Worksheet</button>
+        
+        <!-- Analysis Results Section -->
+        <div id="analysisResult"></div>
+    </div>
+
+    <script>
+        function handleFileSelect(input, infoId) {
+            const file = input.files[0];
+            if (file) {
+                const info = document.getElementById(infoId);
+                info.textContent = `Selected file: ${file.name} (${formatFileSize(file.size)})`;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // IndexedDB helpers to store large files (blobs)
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open('quizDB', 1);
+                req.onupgradeneeded = function(e) {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('quizzes')) {
+                        db.createObjectStore('quizzes', { keyPath: 'id' });
+                    }
+                };
+                req.onsuccess = function(e) { resolve(e.target.result); };
+                req.onerror = function(e) { reject(e.target.error); };
+            });
+        }
+
+        function saveQuizToIDB(quizData) {
+            return openDB().then(db => new Promise((resolve, reject) => {
+                const tx = db.transaction('quizzes', 'readwrite');
+                const store = tx.objectStore('quizzes');
+                const req = store.put(quizData);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = (e) => reject(e.target.error);
+            }));
+        }
+
+        function uploadFiles() {
+            const pdfFile = document.getElementById('pdfUpload').files[0];
+            const imageFile = document.getElementById('imageUpload').files[0];
+
+            // Create a unique ID for this worksheet
+            const worksheetId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+            if (pdfFile) {
+                // Store the file blob in IndexedDB (avoids localStorage quota limits)
+                const quizData = {
+                    id: worksheetId,
+                    type: 'pdf',
+                    file: pdfFile,
+                    timestamp: Date.now()
+                };
+                saveQuizToIDB(quizData).then(() => {
+                    const url = URL.createObjectURL(pdfFile);
+                    const quizHtml = `
+                        <div class="card">
+                            <h2>Uploaded PDF</h2>
+                            <div class="content">
+                                <embed src="${url}" type="application/pdf" style="width:100%;height:500px;" />
+                            </div>
+                        </div>
+                        <div class="nav">
+                            <button onclick="generateSummary()">Generate Score & Summary</button>
+                        </div>
+                        <div class="summary" id="summary">
+                            <h2>Summary</h2>
+                            <div id="summaryContent"></div>
+                            <button onclick="downloadCSV()">Download CSV</button>
+                        </div>
+                    `;
+
+                    // Generate shareable link
+                    const shareableLink = `http://localhost:3004/quiz.html?id=${worksheetId}`;
+
+                    // Display the quiz and the link
+                    document.getElementById('analysisResult').innerHTML = `
+                        <div class="card">
+                            <h2>Worksheet Created Successfully!</h2>
+                            <p>Share this link with your students:</p>
+                            <div style="background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                                <code id="quizLink">${shareableLink}</code>
+                                <button onclick="copyLink()" style="margin-left: 10px">Copy Link</button>
+                            </div>
+                        </div>
+                        ${quizHtml}
+                    `;
+                // Clear file input and info after upload
+                document.getElementById('pdfUpload').value = '';
+                document.getElementById('pdfInfo').textContent = '';
+                }).catch(err => {
+                    console.error('Failed to save quiz to IDB', err);
+                    alert('Failed to save quiz. See console for details.');
+                });
+            } else if (imageFile) {
+                const quizData = {
+                    id: worksheetId,
+                    type: 'image',
+                    file: imageFile,
+                    timestamp: Date.now()
+                };
+                saveQuizToIDB(quizData).then(() => {
+                    const url = URL.createObjectURL(imageFile);
+                    const quizHtml = `
+                        <div class="card">
+                            <h2>Money Worksheet</h2>
+                            <div class="content">
+                                <img src="${url}" alt="Money worksheet" style="max-width: 100%;" />
+                            </div>
+                        </div>
+                        <div class="nav">
+                            <button onclick="generateSummary()">Generate Score & Summary</button>
+                        </div>
+                        <div class="summary" id="summary">
+                            <h2>Summary</h2>
+                            <div id="summaryContent"></div>
+                            <button onclick="downloadCSV()">Download CSV</button>
+                        </div>
+                    `;
+
+                    // Generate shareable link
+                    const shareableLink = `http://localhost:3004/quiz.html?id=${worksheetId}`;
+
+                    // Display the quiz and the link
+                    document.getElementById('analysisResult').innerHTML = `
+                        <div class="card">
+                            <h2>Worksheet Created Successfully!</h2>
+                            <p>Share this link with your students:</p>
+                            <div style="background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                                <code id="quizLink">${shareableLink}</code>
+                                <button onclick="copyLink()" style="margin-left: 10px">Copy Link</button>
+                            </div>
+                        </div>
+                        ${quizHtml}
+                    `;
+                // Clear file input and info after upload
+                document.getElementById('imageUpload').value = '';
+                document.getElementById('imageInfo').textContent = '';
+                }).catch(err => {
+                    console.error('Failed to save quiz to IDB', err);
+                    alert('Failed to save quiz. See console for details.');
+                });
+            } else {
+                alert('Please select a file to upload');
+            }
+        }
+
+        function copyLink() {
+            const linkElement = document.getElementById('quizLink');
+            const textArea = document.createElement('textarea');
+            textArea.value = linkElement.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('Link copied to clipboard!');
+        }
+
+        function checkAnswer(questionId) {
+            const answer = document.getElementById(questionId).value.trim();
+            const feedback = document.getElementById('feedback-' + questionId);
+            feedback.style.display = 'block';
+            feedback.style.background = '#e8f5e9';
+            feedback.style.padding = '10px';
+            feedback.style.borderRadius = '5px';
+            feedback.innerHTML = 'Your answer has been recorded. Use the Generate Score & Summary button to see your results.';
+        }
+
+        function aiHelp(questionId) {
+            const feedback = document.getElementById('feedback-' + questionId);
+            feedback.style.display = 'block';
+            feedback.style.background = '#fff3e0';
+            feedback.style.padding = '10px';
+            feedback.style.borderRadius = '5px';
+            feedback.innerHTML = 'Hint: Review the material carefully and focus on the main points. Consider what the text/image is trying to communicate.';
+        }
+
+        function generateSummary() {
+            const summary = document.getElementById('summary');
+            summary.style.display = 'block';
+            
+            const answers = {
+                q1: document.getElementById('q1').value.trim(),
+                q2: document.getElementById('q2').value.trim(),
+                q3: document.getElementById('q3')?.value.trim()
+            };
+            
+            const summaryContent = document.getElementById('summaryContent');
+            summaryContent.innerHTML = `
+                <p><strong>Questions Answered:</strong> ${Object.values(answers).filter(a => a).length}</p>
+                <p><strong>Questions Remaining:</strong> ${Object.values(answers).filter(a => !a).length}</p>
+                <p>Your answers have been saved. You can download them using the button below.</p>
+            `;
+        }
+
+        function downloadCSV() {
+            const answers = {
+                'Question 1': document.getElementById('q1').value.trim(),
+                'Question 2': document.getElementById('q2').value.trim(),
+                'Question 3': document.getElementById('q3')?.value.trim() || 'N/A'
+            };
+            
+            const csvContent = Object.entries(answers)
+                .map(([q, a]) => `${q},"${a.replace(/"/g, '""')}"`)
+                .join('\n');
+            
+            const blob = new Blob(['Question,Answer\n' + csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'worksheet_answers.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>

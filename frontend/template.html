@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interactive Quiz</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #e8f5e9;
+            --primary-dark: #45a049;
+            --text: #232323;
+            --bg: #f4f4f4;
+            --white: #ffffff;
+            --error: #dc3545;
+            --success: #28a745;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+            color: var(--text);
+            background: var(--bg);
+        }
+        
+        .wrap {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 16px 80px;
+        }
+        
+        .container {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .email-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--primary-light);
+            border-radius: 8px;
+        }
+        
+        .email-input {
+            padding: 12px;
+            width: 100%;
+            max-width: 300px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .quiz-section {
+            display: none;
+        }
+        
+        .question {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .options label {
+            display: block;
+            margin: 10px 0;
+            padding: 12px;
+            background: var(--white);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .options label:hover {
+            background: var(--primary-light);
+        }
+        
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .correct {
+            background: var(--primary-light);
+            color: var(--success);
+        }
+        
+        .incorrect {
+            background: #ffebee;
+            color: var(--error);
+        }
+        
+        button {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: var(--primary-dark);
+        }
+        
+        .final-score {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--primary-light);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: clamp(28px, 3.6vw, 44px);
+            line-height: 1.1;
+            letter-spacing: .4px;
+        }
+        .badge {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            background: #00000012;
+            padding: 6px 10px;
+            border-radius: 999px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .candy-svg {
+            position: absolute;
+            right: -30px;
+            bottom: -30px;
+            width: 180px;
+            opacity: .25;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #00000014;
+            border-radius: 16px;
+            padding: 18px 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,.06);
+        }
+
+        .grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .grid.two {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .grid.three {
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        .passage {
+            background: linear-gradient(180deg, #fffdf9, #fff);
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px dashed #ffb870;
+        }
+
+        .passage h2 {
+            margin: 0 0 8px;
+        }
+
+        .meta {
+            font-size: 13px;
+            color: #444;
+        }
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 10px 0 0;
+        }
+
+        .btn {
+            appearance: none;
+            border: 0;
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 6px 16px rgba(76, 175, 80, 0.35);
+        }
+
+        .btn.secondary {
+            background: var(--primary-light);
+            color: var(--text);
+            box-shadow: 0 6px 16px rgba(232, 245, 233, 0.35);
+        }
+
+        .btn.ghost {
+            background: #00000007;
+            color: #333;
+            border: 1px solid #00000012;
+            box-shadow: none;
+        }
+
+        .btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .page {
+            display: none;
+            animation: fade .25s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+
+        .q {
+            border: 1px solid var(--primary);
+            border-radius: 14px;
+            padding: 14px;
+            background: #fff;
+            margin-bottom: 20px;
+        }
+
+        .q h3 {
+            margin: 0 0 6px;
+            font-size: 18px;
+            color: var(--text);
+        }
+
+        .q small {
+            color: #6b6b6b;
+        }
+
+        .q textarea,
+        .q input[type="text"] {
+            width: 100%;
+            min-height: 90px;
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 15px;
+            background: var(--white);
+        }
+
+        .q .options {
+            display: grid;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .q .options label {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--primary-light);
+            border-radius: 10px;
+            background: var(--white);
+            transition: all 0.2s;
+        }
+
+        .q .options label:hover {
+            background: var(--primary-light);
+        }
+
+        .q .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .q .aiout {
+            margin-top: 12px;
+            padding: 15px;
+            border-radius: 10px;
+            background: var(--primary-light);
+            border: 1px solid var(--primary);
+        }
+
+        .score-pill {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: var(--primary-light);
+            border: 1px solid var(--primary);
+            font-size: 12px;
+            color: var(--text);
+        }
+
+        .footer-sticky {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            border-top: 1px solid var(--primary);
+            padding: 15px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            z-index: 5;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .progress {
+            --p: 0;
+            position: relative;
+            height: 10px;
+            background: var(--primary-light);
+            border-radius: 999px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .progress::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--p);
+            background: var(--primary);
+            border-radius: 999px;
+            transition: width 0.3s ease;
+        }
+
+        .note {
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        @keyframes fade {
+            from {
+                opacity: .6;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .sr-only {
+            position: absolute !important;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            border: 0;
+            padding: 0;
+            white-space: nowrap;
+            clip-path: inset(50%);
+            clip: rect(0 0 0 0);
+            overflow: hidden;
+        }
+  </style>
+  <!-- MathJax for LaTeX (just in case we add math) -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="card">
+      <h1>🍬 Candy Corn — A Unique Treat (Interactive Worksheet)</h1>
+      <div class="badge"><span>Reading comprehension</span> • <span>AI hints + instant feedback</span></div>
+      <div id="saveStatus" class="note" style="margin-top:10px;text-align:right">Not connected</div>
+      <!-- decorative vector -->
+      <svg class="candy-svg" viewBox="0 0 200 260" aria-hidden="true">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#fff7ee"/>
+            <stop offset="100%" stop-color="#ffffff"/>
+          </linearGradient>
+          <linearGradient id="g2" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#ffa463"/>
+            <stop offset="100%" stop-color="#ff7a1c"/>
+          </linearGradient>
+          <linearGradient id="g3" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#ffe36d"/>
+            <stop offset="100%" stop-color="#ffc531"/>
+          </linearGradient>
+        </defs>
+        <path d="M100 8 C68 44 30 138 20 188 c-8 38 16 64 80 64 s88-26 80-64 C170 138 132 44 100 8z" fill="#2b1f14" opacity=".12"/>
+        <path d="M100 20 C70 54 34 142 26 186 c-7 34 14 56 74 56 s81-22 74-56 C166 142 130 54 100 20z" fill="url(#g1)"/>
+        <path d="M100 86 c-42 0-72 18-78 46 c-5 23 12 44 78 44 s83-21 78-44 c-6-28-36-46-78-46z" fill="url(#g2)"/>
+        <path d="M100 158 c-40 0-74 16-76 40 c-2 26 20 38 76 38 s78-12 76-38 c-2-24-36-40-76-40z" fill="url(#g3)"/>
+        <circle cx="70" cy="120" r="5" fill="#2d1f0f"/>
+        <circle cx="130" cy="120" r="5" fill="#2d1f0f"/>
+        <path d="M84 142 q16 14 32 0" stroke="#2d1f0f" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+    </header>
+
+    <section class="passage card" id="passage">
+      <h2>Reading Passage: <em>Candy Corn — A Unique Treat</em></h2>
+      <p class="meta">Read the article carefully. You can refer back to it anytime while answering.</p>
+      <div class="grid">
+        <p>
+          Every Halloween, thousands of children dressed in costumes walk door to door to collect candy and sweet treats. One particular treat, candy corn, has been a Halloween favorite for over 100 years! In fact, candy corn has its own special day, National Candy Corn Day, on <strong>October 30<sup>th</sup></strong>.
+        </p>
+        <p>
+          In the 1800’s, candy‑maker <strong>George Renninger</strong>, who worked for the Wunderlee Candy Company, invented the unique, cone‑shaped candy. It was an instant hit and was especially popular among <strong>farmers</strong>.
+        </p>
+        <p>
+          Long ago, workers mixed sugar, water, and corn syrup in large kettles and then added fondant (a smooth, sugary, creamy icing) and marshmallows. After cooking for the correct amount of time, they poured the mixture by hand into molds, <em>one color at a time</em>: first yellow, then orange, and finally white. After hardening, workers removed the candy from each mold and packaged it for sale. Because the process was so time‑consuming, candy corn was only sold from March to November.
+        </p>
+        <p>
+          Today, the process is much simpler because of machines. The <q>corn starch molding process</q> helps create thousands of candy corn pieces much more quickly than the hand‑made process. A machine fills molds with cornstarch. Each hole is then machine‑filled partway with a sweet white syrup, followed by a layer of orange syrup, and finally a layer of yellow syrup. After the molds are filled, they cool and harden for 24 hours. Another machine empties the trays, and the kernels are pushed into <em>chutes</em>—tubes or slides. Extra cornstarch is shaken off, and the candy is given a coating of sugary glaze to make it shiny. Workers then package the candies for sale in stores.
+        </p>
+        <p>
+          How much candy corn is sold each year? The number is staggering. According to the National Confectioners Association, candy makers produce nearly \(35\,\text{million}\) pounds of candy corn each year—about \(9\,\text{billion}\) individual kernels of corn!
+        </p>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:14px">
+      <h2 style="margin:0 0 8px">Questions</h2>
+      <p class="note bullet">Each question has <strong>AI Help</strong> (step‑by‑step hints, no answers) and a <strong>Check</strong> button (instant AI feedback). Your score updates at the bottom.</p>
+    </section>
+
+    <!-- PAGE 1: History & Popularity (Q1, Q2) -->
+    <section class="page active" data-page="1">
+      <div class="grid two">
+        <div class="q" id="q1" data-points="1">
+          <h3>1) Who invented candy corn, and when was it first created?</h3>
+          <small>Answer in one or two sentences.</small>
+          <textarea placeholder="Type your answer here..."></textarea>
+          <div class="actions">
+            <button class="btn secondary" onclick="aiHelp('q1')">AI Help</button>
+            <button class="btn" onclick="checkAnswer('q1')">Check</button>
+            <span class="score-pill" id="pill-q1">Score: –</span>
+          </div>
+          <div class="aiout" id="out-q1" hidden></div>
+        </div>
+
+        <div class="q" id="q2" data-points="2">
+          <h3>2) Popularity & inference</h3>
+          <small>a) With which group of people was the first candy corn most popular?<br/>b) Why do you think this group especially liked the candy?</small>
+          <textarea placeholder="a) …\n\nb) …"></textarea>
+          <div class="actions">
+            <button class="btn secondary" onclick="aiHelp('q2')">AI Help</button>
+            <button class="btn" onclick="checkAnswer('q2')">Check</button>
+            <span class="score-pill" id="pill-q2">Score: –</span>
+          </div>
+          <div class="aiout" id="out-q2" hidden></div>
+        </div>
+      </div>
+      <div class="nav">
+        <span></span>
+        <button class="btn ghost" onclick="go(2)">Next →</button>
+      </div>
+    </section>
+
+    <!-- PAGE 2: Dates & Vocabulary (Q3, Q6) -->
+    <section class="page" data-page="2">
+      <div class="grid two">
+        <div class="q" id="q3" data-points="1">
+          <h3>3) When is National Candy Corn Day?</h3>
+          <input type="text" placeholder="e.g., October 30th" />
+          <div class="actions">
+            <button class="btn secondary" onclick="aiHelp('q3')">AI Help</button>
+            <button class="btn" onclick="checkAnswer('q3')">Check</button>
+            <span class="score-pill" id="pill-q3">Score: –</span>
+          </div>
+          <div class="aiout" id="out-q3" hidden></div>
+        </div>
+
+        <div class="q" id="q6" data-points="1">
+          <h3>6) In the 4th paragraph, what does the word <em>“chutes”</em> mean?</h3>
+          <div class="options" role="group" aria-label="Multiple choice for the meaning of chutes">
+            <label><input type="radio" name="q6" value="a"/> a. molds</label>
+            <label><input type="radio" name="q6" value="b"/> b. board games</label>
+            <label><input type="radio" name="q6" value="c"/> c. hallways</label>
+            <label><input type="radio" name="q6" value="d"/> d. tubes for sliding objects or people</label>
+          </div>
+          <div class="actions">
+            <button class="btn secondary" onclick="aiHelp('q6')">AI Help</button>
+            <button class="btn" onclick="checkAnswer('q6')">Check</button>
+            <span class="score-pill" id="pill-q6">Score: –</span>
+          </div>
+          <div class="aiout" id="out-q6" hidden></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn ghost" onclick="go(1)">← Back</button>
+        <button class="btn ghost" onclick="go(3)">Next →</button>
+      </div>
+    </section>
+
+    <!-- PAGE 3: Ingredients, Amount, Process (Q4, Q5, Q7) -->
+    <section class="page" data-page="3">
+      <div class="grid three">
+        <div class="q" id="q4" data-points="2">
+          <h3>4) Name <strong>five</strong> main ingredients of hand‑made candy corn.</h3>
+          <textarea placeholder="List the five ingredients…"></textarea>
+          <div class="actions">
+            <button class="btn secondary" onclick="aiHelp('q4')">AI Help</button>
+            <button class="btn" onclick="checkAnswer('q4')">Check</button>
+            <span class="score-pill" id="pill-q4">Score: –</span>
+          </div>
+          <div class="aiout" id="out-q4" hidden></div>
+        </div>
+
+        <div class="q" id="q5" data-points="1">
+          <h3>5) How much candy corn is sold each year?</h3>
+          <input type="text" placeholder="Two ways are mentioned in the article…" />
+          <div class="actions">
+            <button class="btn secondary" onclick="aiHelp('q5')">AI Help</button>
+            <button class="btn" onclick="checkAnswer('q5')">Check</button>
+            <span class="score-pill" id="pill-q5">Score: –</span>
+          </div>
+          <div class="aiout" id="out-q5" hidden></div>
+        </div>
+
+        <div class="q" id="q7" data-points="2">
+          <h3>7) How is making candy corn today different from the process used in the 1800s?</h3>
+          <small>Give details from the article to support your answer.</small>
+          <textarea placeholder="Explain at least two differences with details…"></textarea>
+          <div class="actions">
+            <button class="btn secondary" onclick="aiHelp('q7')">AI Help</button>
+            <button class="btn" onclick="checkAnswer('q7')">Check</button>
+            <span class="score-pill" id="pill-q7">Score: –</span>
+          </div>
+          <div class="aiout" id="out-q7" hidden></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn ghost" onclick="go(2)">← Back</button>
+        <span></span>
+      </div>
+    </section>
+
+    <div class="footer-sticky">
+      <div class="progress" id="progress" aria-hidden="true"></div>
+      <button class="btn" onclick="generateSummary()">✨ Generate Score & Summary</button>
+      <span class="note">Your API key runs in‑browser as requested. For production, route calls via a server to keep keys secret.</span>
+    </div>
+
+  </div>
+
+  <script>
+    // ======================
+    //  ⚙️ Configuration
+    // ======================
+    // The user provided API key (client-side use is inherently insecure; included as requested).
+    const OPENAI_API_KEY = "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";
+    const MODEL = "gpt-4o-mini"; // efficient, multimodal-capable text model
+
+    // Answer key (used only for scoring + summary; AI writes feedback)
+    const ANSWERS = {
+      q1: {key: ["george renninger"], when: ["1800", "late 180", "nineteenth"], rubric:"Name the inventor and era (George Renninger; late 1800s)."},
+      q2: {keyA: ["farmer", "farmers"], rubric:"(a) Farmers; (b) sensible reason like it looks like corn kernels/harvest connection."},
+      q3: {key: ["october 30"], rubric:"Must include the date October 30th."},
+      q4: {list: ["sugar","water","corn syrup","fondant","marshmallow","marshmallows"], need:5, rubric:"List these five: sugar, water, corn syrup, fondant, marshmallows."},
+      q5: {keyNum: ["35 million", "35,000,000", "9 billion", "9,000,000,000"], rubric:"Either ~35 million pounds or about 9 billion kernels."},
+      q6: {choice: "d", rubric:"d) tubes for sliding objects or people."},
+      q7: {rubric:"Explain machine-based modern process (cornstarch molding, layered syrups, 24h harden, chutes, glaze) vs. hand-poured one-color-at-a-time in 1800s."}
+    };
+
+    // Page navigation
+    function go(n){
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      const target = document.querySelector(`.page[data-page="${n}"]`);
+      if(target) target.classList.add('active');
+      updateProgress();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    function activeIndex(){
+      const pages=[...document.querySelectorAll('.page')];
+      return pages.findIndex(p=>p.classList.contains('active')) + 1;
+    }
+    function updateProgress(){
+      const pages=[...document.querySelectorAll('.page')];
+      const idx = activeIndex();
+      const pct = Math.round((idx/pages.length)*100);
+      document.getElementById('progress').style.setProperty('--p', pct+'%');
+      document.getElementById('progress').setAttribute('aria-label', `Progress ${pct}%`);
+    }
+    updateProgress();
+
+    // Helpers
+    function el(q){return document.querySelector(q)}
+    function show(id, html){const n = el('#'+id); n.innerHTML = html; n.hidden=false;}
+    function pill(id, text){el('#pill-'+id).textContent = text}
+    function getAnswer(qid){
+      const q = el('#'+qid);
+      const ta = q.querySelector('textarea');
+      const inp = q.querySelector('input[type="text"]');
+      if(ta) return ta.value.trim();
+      if(inp) return inp.value.trim();
+      // radios
+      const r = q.querySelector('input[type="radio"]:checked');
+      return r ? r.value : '';
+    }
+
+    // Basic local scoring (string contains/sets); AI is used for feedback
+    function localScore(qid){
+      const A = ANSWERS[qid];
+      const ans = getAnswer(qid).toLowerCase();
+      if(qid==='q6') return ans===A.choice ? 1 : 0;
+      if(qid==='q3') return A.key.some(k=>ans.includes(k)) ? 1 : 0;
+      if(qid==='q1'){
+        const hasWho = A.key.some(k=>ans.includes(k));
+        const hasWhen = A.when.some(k=>ans.includes(k));
+        return (hasWho && hasWhen) ? 1 : (hasWho||hasWhen?0.5:0);
+      }
+      if(qid==='q2'){
+        const hasA = A.keyA.some(k=>ans.includes(k));
+        // part b is open: if at least 8 words total and has reason-ish words, give credit
+        const reasonish = /(because|since|as|harvest|corn|kernel|farm|looks|season)/.test(ans);
+        if(hasA && reasonish) return 2; // worth 2 pts
+        if(hasA) return 1;
+        return 0;
+      }
+      if(qid==='q4'){
+        const tokens = Array.from(new Set(ans.replace(/[,;\n]/g,' ').split(/\s+/).filter(Boolean)));
+        let count=0; A.list.forEach(k=>{ if(tokens.some(t=>t.toLowerCase()===k)) count++; });
+        // Deduplicate marshmallow(s)
+        if(tokens.includes('marshmallow') && tokens.includes('marshmallows')) count--; 
+        return Math.min(2, count>=5 ? 2 : (count>=3?1:0));
+      }
+      if(qid==='q5'){
+        return A.keyNum.some(k=>ans.includes(k)) ? 1 : 0;
+      }
+      if(qid==='q7'){
+        const old = /(hand|poured|one color|yellow|orange|white|kettles|by hand)/.test(ans);
+        const modern = /(machine|cornstarch|molding|24|chute|glaze|layers?)/.test(ans);
+        if(old && modern) return 2;
+        if(old||modern) return 1;
+        return 0;
+      }
+      return 0;
+    }
+
+    // ======================
+    //  🤖 OpenAI helpers
+    // ======================
+    async function openaiChat(messages, temperature=0.2){
+      const res = await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+OPENAI_API_KEY},
+        body: JSON.stringify({model: MODEL, messages, temperature})
+      });
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error('OpenAI error: '+t);
+      }
+      const data = await res.json();
+      return data.choices[0].message.content.trim();
+    }
+
+    function questionPrompt(qid){
+      const text = getAnswer(qid);
+      const rub = ANSWERS[qid]?.rubric || '';
+      return {text, rub};
+    }
+
+    // AI Help: give steps, not the final answer
+    async function aiHelp(qid){
+      try{
+        const {rub} = questionPrompt(qid);
+        const msg = [
+          {role:'system', content:'You are a helpful reading-comprehension tutor. Provide SIMPLE, scaffolded steps and hints. DO NOT reveal the final answer. Do not quote more than a short phrase from the passage.'},
+          {role:'user', content: `Question: ${document.querySelector('#'+qid+' h3').innerText}\nRubric/what counts: ${rub}.\nGive 3-5 numbered hints to guide the student, ending with a reminder to check the passage.`}
+        ];
+        el('#'+qid+' .actions .secondary').disabled = true;
+        show('out-'+qid, '🧠 Thinking…');
+        const out = await openaiChat(msg, 0.4);
+        show('out-'+qid, out);
+      }catch(e){
+        show('out-'+qid, '⚠️ '+e.message);
+      }finally{
+        el('#'+qid+' .actions .secondary').disabled = false;
+      }
+    }
+
+    // Check answer: get local score AND AI feedback (JSON)
+    async function checkAnswer(qid){
+      const userAns = getAnswer(qid);
+      if(!userAns){ show('out-'+qid, 'Please enter an answer first.'); return; }
+      const local = localScore(qid);
+      pill(qid, `Scored: ${local}/${Number(el('#'+qid).dataset.points)}`);
+
+      // Ask AI for feedback succinctly
+      const rubric = ANSWERS[qid]?.rubric || '';
+      const jsonInstr = 'Return strict JSON with keys "feedback" (1-3 sentences), "correct_answer" (concise), and "score" (a number between 0 and the max points). No code blocks.';
+      const maxPts = Number(el('#'+qid).dataset.points);
+      const messages=[
+        {role:'system', content:'You are an expert reading-comprehension grader. Be brief, specific, and kind.'},
+        {role:'user', content:`Grade this answer based on the article about candy corn.\nQuestion: ${document.querySelector('#'+qid+' h3').innerText}\nStudent answer: ${userAns}\nRubric: ${rubric}\nMaximum points: ${maxPts}. ${jsonInstr}`}
+      ];
+      try{
+        el('#'+qid+' .actions .btn:not(.secondary)').disabled = true;
+        show('out-'+qid, '🔎 Checking…');
+        const out = await openaiChat(messages, 0.2);
+        let parsed=null; try{ parsed = JSON.parse(out); }catch{ /* if model drifts, fall back */ }
+        if(parsed && typeof parsed.score!=="undefined"){
+          // Prefer AI score if within range, else local
+          let s = Number(parsed.score); if(!(s>=0 && s<=maxPts)) s = local;
+          pill(qid, `Scored: ${s}/${maxPts}`);
+          show('out-'+qid, `✅ <strong>Feedback:</strong> ${parsed.feedback || '—'}<br><strong>Answer (for reference):</strong> ${parsed.correct_answer || '—'}`);
+          el('#'+qid).dataset.score = s;
+          el('#'+qid).dataset.correct = parsed.correct_answer || '';
+        }else{
+          pill(qid, `Scored: ${local}/${maxPts}`);
+          show('out-'+qid, '✅ Checked. (AI feedback unavailable, used local scoring.)');
+          el('#'+qid).dataset.score = local;
+          el('#'+qid).dataset.correct = rubric;
+        }
+      }catch(e){
+        pill(qid, `Scored: ${local}/${maxPts}`);
+        show('out-'+qid, '⚠️ '+e.message+ ' (showing local result)');
+        el('#'+qid).dataset.score = local;
+      }finally{
+        el('#'+qid+' .actions .btn:not(.secondary)').disabled = false;
+      }
+    }
+
+    // Final summary
+    async function generateSummary(){
+      // Collect all Q/A
+      const qBlocks = [...document.querySelectorAll('.q')];
+      const rows = qBlocks.map(q=>{
+        const id = q.id;
+        const title = q.querySelector('h3').innerText;
+        const ans = getAnswer(id);
+        const pts = Number(q.dataset.points);
+        const score = Number(q.dataset.score || 0);
+        const correct = q.dataset.correct || '';
+        return {id,title,answer: ans || '(blank)', score, pts, correct};
+      });
+      const total = rows.reduce((a,r)=>a+r.score,0);
+      const max = rows.reduce((a,r)=>a+r.pts,0);
+
+      // Ask AI to polish a concise summary body (not the grades themselves)
+      const messages=[
+        {role:'system', content:'You summarize results for a student. Be concise, encouraging, and actionable.'},
+        {role:'user', content:`Create a brief paragraph praising what went well and two tips to improve, based on this data: ${JSON.stringify(rows.map(r=>({q:r.id,score:r.score,pts:r.pts})))}. Keep to 3-5 sentences.`}
+      ];
+      let tipText='';
+      try{ tipText = await openaiChat(messages, 0.5); }catch{ tipText = 'Great effort! Review the passage for dates, vocabulary, and process steps. Use the AI Help hints before checking.' }
+
+      // Render modal-like summary
+      const html = `
+        <div class="card" style="position:fixed;inset:20px;z-index:20;background:#fffefb;border:2px solid #ffd3a6;overflow:auto;border-radius:16px;padding:18px">
+          <h2 style="margin-top:0">📊 Score & Summary</h2>
+          <p><strong>Total:</strong> ${total} / ${max}</p>
+          <div class="grid">
+            <table style="border-collapse:separate;border-spacing:0;width:100%">
+              <thead>
+                <tr><th style="text-align:left;padding:8px;border-bottom:2px solid #ffe2c0">Question</th><th style="text-align:left;padding:8px;border-bottom:2px solid #ffe2c0">Your answer</th><th style="text-align:left;padding:8px;border-bottom:2px solid #ffe2c0">Correct answer</th><th style="text-align:left;padding:8px;border-bottom:2px solid #ffe2c0">Score</th></tr>
+              </thead>
+              <tbody>
+                ${rows.map(r=>`<tr>
+                  <td style="vertical-align:top;padding:8px;border-bottom:1px solid #fff0e1">${r.title}</td>
+                  <td style="vertical-align:top;padding:8px;border-bottom:1px solid #fff0e1;white-space:pre-wrap">${escapeHtml(r.answer)}</td>
+                  <td style="vertical-align:top;padding:8px;border-bottom:1px solid #fff0e1;white-space:pre-wrap">${escapeHtml(r.correct || '(see rubric)')}</td>
+                  <td style="vertical-align:top;padding:8px;border-bottom:1px solid #fff0e1">${r.score} / ${r.pts}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div class="card" style="margin-top:12px;background:#fff9f0;border:1px solid #ffd9b9">
+            <strong>Teacher note:</strong> ${tipText}
+          </div>
+          <div class="nav" style="margin-top:14px">
+            <span></span>
+            <button class="btn" onclick="this.closest('div[style*=position:fixed]').remove()">Close</button>
+          </div>
+        </div>`;
+      const portal = document.createElement('div');
+      portal.innerHTML = html;
+      document.body.appendChild(portal);
+    }
+
+    function escapeHtml(s){
+      return s.replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    // ======================
+    //  💾 Load & Auto-save JSON
+    // ======================
+    // quiz id comes from ?id=QUIZ_ID in URL
+    function getQuizIdFromQuery(){
+      try{
+        const p = new URLSearchParams(location.search);
+        return p.get('id') || p.get('quizId') || null;
+      }catch(e){return null}
+    }
+
+    async function loadQuiz(){
+      const id = getQuizIdFromQuery();
+      const status = el('#saveStatus');
+      if(!id){ status && (status.textContent = 'No quiz id in URL'); return; }
+      status && (status.textContent = 'Loading quiz...');
+      try{
+        const res = await fetch(`/api/quizzes/${encodeURIComponent(id)}`);
+        if(!res.ok) throw new Error('Quiz not found');
+        const j = await res.json();
+        if(j && j.quiz && j.quiz.finalizedJson){
+          populateFields(j.quiz.finalizedJson);
+          status && (status.textContent = 'Loaded quiz: ' + (j.quiz.finalizedJson.title || id));
+        }else{
+          status && (status.textContent = 'Loaded empty quiz');
+        }
+      }catch(err){
+        status && (status.textContent = 'Load error: '+err.message);
+      }
+    }
+
+    // Populate DOM fields from quiz JSON (simple mapping by question id)
+    function populateFields(json){
+      try{
+        // assume json.questions is array of {id, prompt, type, value}
+        const qs = json.questions || [];
+        qs.forEach(q=>{
+          const node = document.getElementById(q.id);
+          if(!node) return;
+          const ta = node.querySelector('textarea');
+          const inp = node.querySelector('input[type="text"]');
+          if(ta && typeof q.value!=='undefined') ta.value = q.value;
+          if(inp && typeof q.value!=='undefined') inp.value = q.value;
+          if(q.type === 'radio' && Array.isArray(q.options)){
+            q.options.forEach(opt=>{
+              const r = node.querySelector(`input[type=radio][value="${opt.value}"]`);
+              if(r && opt.checked) r.checked = true;
+            });
+          }
+        });
+      }catch(e){ console.warn('populateFields failed', e); }
+    }
+
+    // Collect a minimal JSON representation from DOM
+    function collectJsonFromDOM(){
+      const qBlocks = [...document.querySelectorAll('.q')];
+      const questions = qBlocks.map(q=>{
+        const id = q.id;
+        const ta = q.querySelector('textarea');
+        const inp = q.querySelector('input[type="text"]');
+        const r = q.querySelector('input[type="radio"]:checked');
+        const value = ta ? ta.value : (inp ? inp.value : (r ? r.value : ''));
+        return { id, value };
+      });
+      return { title: document.querySelector('header h1')?.innerText || '', questions };
+    }
+
+    // debounce helper
+    function debounce(fn, wait){ let t; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), wait); }; }
+
+    // Save quiz JSON to server (upsert)
+    const doSave = debounce(async function(){
+      const id = getQuizIdFromQuery() || ('quiz_' + Date.now().toString(36));
+      const payload = { id, finalizedJson: collectJsonFromDOM() };
+      const status = el('#saveStatus');
+      if(status) status.textContent = 'Saving…';
+      try{
+        const res = await fetch('/api/quizzes', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if(data && data.ok){ status && (status.textContent = 'Saved ✓'); }
+        else status && (status.textContent = 'Save failed');
+      }catch(e){ status && (status.textContent = 'Save error'); console.warn(e); }
+    }, 700);
+
+    // listen for changes in inputs and textareas
+    function wireAutoSave(){
+      document.querySelectorAll('.q textarea, .q input[type="text"], .q input[type="radio"]').forEach(elm=>{
+        elm.addEventListener('input', ()=> doSave());
+        elm.addEventListener('change', ()=> doSave());
+      });
+      // try to send on unload
+      window.addEventListener('beforeunload', function(){
+        const id = getQuizIdFromQuery() || null;
+        const payload = id ? { id, finalizedJson: collectJsonFromDOM() } : null;
+        if(payload && navigator.sendBeacon){
+          const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
+          navigator.sendBeacon('/api/quizzes', blob);
+        }
+      });
+    }
+
+    // Start
+    loadQuiz().then(()=> wireAutoSave());
+  </script>
+</body>
+</html>
