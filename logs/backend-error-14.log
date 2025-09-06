@@ -1,0 +1,6 @@
+2025-09-05T22:46:25: (node:269534) Warning: Accessing non-existent property 'extractImageText' of module exports inside circular dependency
+2025-09-05T22:46:25: (Use `node --trace-warnings ...` to show where the warning was created)
+2025-09-05T22:46:25: (node:269534) Warning: Accessing non-existent property 'extractPdfText' of module exports inside circular dependency
+2025-09-05T22:46:25: (node:269534) Warning: Accessing non-existent property 'callOpenAI' of module exports inside circular dependency
+2025-09-05T22:46:25: (node:269534) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2025-09-05T22:46:25: (node:269534) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version

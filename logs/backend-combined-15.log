@@ -1,0 +1,24 @@
+2025-09-05T22:59:01: [dotenv@17.2.2] injecting env (2) from .env -- tip: 📡 auto-backup env with Radar: https://dotenvx.com/radar
+2025-09-05T22:59:01: (node:269878) Warning: Accessing non-existent property 'extractImageText' of module exports inside circular dependency
+2025-09-05T22:59:01: (Use `node --trace-warnings ...` to show where the warning was created)
+2025-09-05T22:59:01: (node:269878) Warning: Accessing non-existent property 'extractPdfText' of module exports inside circular dependency
+2025-09-05T22:59:01: (node:269878) Warning: Accessing non-existent property 'callOpenAI' of module exports inside circular dependency
+2025-09-05T22:59:01: (node:269878) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2025-09-05T22:59:01: (node:269878) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2025-09-05T22:59:01: Server running on port 3004
+2025-09-05T22:59:01: [dotenv@17.2.1] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2025-09-05T22:59:01: Server is running on port 3004
+2025-09-05T22:59:01: Frontend server exited with code 0
+2025-09-05T22:59:04: Connected to MongoDB
+2025-09-06T00:02:50: [dotenv@17.2.2] injecting env (2) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+2025-09-06T00:02:50: (node:271187) Warning: Accessing non-existent property 'extractImageText' of module exports inside circular dependency
+2025-09-06T00:02:50: (Use `node --trace-warnings ...` to show where the warning was created)
+2025-09-06T00:02:50: (node:271187) Warning: Accessing non-existent property 'extractPdfText' of module exports inside circular dependency
+2025-09-06T00:02:50: (node:271187) Warning: Accessing non-existent property 'callOpenAI' of module exports inside circular dependency
+2025-09-06T00:02:50: (node:271187) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2025-09-06T00:02:50: (node:271187) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+2025-09-06T00:02:50: Server running on port 3004
+2025-09-06T00:02:50: [dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+2025-09-06T00:02:50: Server is running on port 3004
+2025-09-06T00:02:50: Frontend server exited with code 0
+2025-09-06T00:02:53: Connected to MongoDB

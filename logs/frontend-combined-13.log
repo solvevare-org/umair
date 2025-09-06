@@ -1,0 +1,4 @@
+2025-09-05T22:05:30: [dotenv@17.2.1] injecting env (1) from .env -- tip: ⚙️  override existing env vars with { override: true }
+2025-09-05T22:05:30: Server is running on port 3002
+2025-09-05T22:35:30: [dotenv@17.2.1] injecting env (1) from .env -- tip: 📡 auto-backup env with Radar: https://dotenvx.com/radar
+2025-09-05T22:35:30: Server is running on port 3002

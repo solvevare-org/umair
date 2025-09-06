@@ -1,0 +1,12 @@
+2025-09-05T22:05:30: [dotenv@17.2.2] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2025-09-05T22:05:30: Server running on port 3004
+2025-09-05T22:05:30: Connected to MongoDB
+2025-09-05T22:05:30: [dotenv@17.2.1] injecting env (1) from .env -- tip: 📡 version env with Radar: https://dotenvx.com/radar
+2025-09-05T22:05:30: Server is running on port 3004
+2025-09-05T22:05:30: Frontend server exited with code 0
+2025-09-05T22:35:39: [dotenv@17.2.2] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2025-09-05T22:35:39: Server running on port 3004
+2025-09-05T22:35:39: Connected to MongoDB
+2025-09-05T22:35:39: [dotenv@17.2.1] injecting env (1) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2025-09-05T22:35:39: Server is running on port 3004
+2025-09-05T22:35:39: Frontend server exited with code 0
