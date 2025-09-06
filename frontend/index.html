@@ -9,53 +9,138 @@
             font-family: 'Segoe UI', Arial, sans-serif; 
             background: #f5f7fa; 
             margin: 0; 
+            padding: 0;
         }
         .container { 
-            max-width: 900px; 
-            margin: 32px auto; 
-            padding: 16px; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0; 
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         h1 { 
-            color: #2c6bae; 
-            text-align: center; 
-            margin-bottom: 24px; 
+            color: white; 
+            margin: 0; 
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        .subtitle {
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
         }
         .nav { 
             display: flex; 
             justify-content: center; 
-            gap: 18px; 
-            margin-bottom: 32px; 
+            gap: 20px; 
+            margin: 30px 0;
+            flex-wrap: wrap;
         }
         .nav a { 
             background: #4CAF50; 
             color: #fff; 
-            padding: 12px 24px; 
-            border-radius: 7px; 
+            padding: 15px 30px; 
+            border-radius: 8px; 
             text-decoration: none; 
             font-size: 1.1rem; 
-            transition: background 0.2s; 
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .nav a:hover { 
             background: #388e3c; 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        iframe { 
-            width: 100%; 
-            min-height: 600px; 
-            border: 1px solid #bfc8d6; 
-            border-radius: 10px; 
-            background: #fff; 
+        .content {
+            min-height: 60vh;
+            padding: 20px;
+        }
+        .welcome-section {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin: 20px 0;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .feature-desc {
+            color: #666;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
-    <!-- Unified navigation for the complete frontend -->
     <div class="container">
-        <h1>Teacher & Student Platform</h1>
-        <div class="nav">
-            <a href="login.html" target="contentFrame">Login</a>
-            <a href="signup.html" target="contentFrame">Signup</a>
+        <div class="header">
+            <h1>Teacher & Student Platform</h1>
+            <p class="subtitle">AI-Powered Educational Tools</p>
         </div>
-        <iframe name="contentFrame" src="dashboard.html"></iframe>
+        
+        <div class="nav">
+            <a href="login.html">Teacher Login</a>
+            <a href="signup.html">Teacher Signup</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="courses.html">Courses</a>
+            <a href="upload.html">Upload Materials</a>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-section">
+                <h2>Welcome to EduAI Platform</h2>
+                <p>Transform your teaching with AI-powered tools for creating quizzes, managing courses, and engaging students.</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-title">AI Quiz Generation</div>
+                    <div class="feature-desc">Upload PDFs or images and let AI create interactive quizzes automatically.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <div class="feature-title">Course Management</div>
+                    <div class="feature-desc">Organize your courses, manage students, and track their progress.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <div class="feature-title">AI Assistant</div>
+                    <div class="feature-desc">Get instant help with teaching questions and educational content.</div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
