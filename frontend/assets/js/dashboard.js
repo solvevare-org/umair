@@ -17,9 +17,9 @@
         div.innerHTML = html + `<div class="time">${new Date().toLocaleTimeString()}</div>`;
         // attach meta data (like response JSON) for save/edit
         if(meta) div.dataset.meta = JSON.stringify(meta);
-    chat.appendChild(div);
-    // ensure the new message is visible above the fixed composer
-    setTimeout(()=> div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
+        chat.appendChild(div);
+        // ensure the new message is visible above the fixed composer
+        setTimeout(()=> div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
         // persist chat message
         saveChatMessage({role:'assistant', text:html, meta:meta});
         return div;
@@ -30,8 +30,8 @@
         div.className = 'msg user';
         div.textContent = text;
         div.innerHTML += `<div class="time">${new Date().toLocaleTimeString()}</div>`;
-    chat.appendChild(div);
-    setTimeout(()=> div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
+        chat.appendChild(div);
+        setTimeout(()=> div.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
         saveChatMessage({role:'user', text:text});
     }
 
@@ -655,26 +655,26 @@
     }
 
     // Example: when sending a chat message (add teacherId)
-function sendChatMessage(message, file) {
-  const token = localStorage.getItem('token');
-    const teacherId = localStorage.getItem('teacherId');
-  const payload = {
-    teacherId,
-    message,
-    file
-  };
-  fetch('http://31.97.41.27:3004/api/chats', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(res => res.json())
-  .then(data => {
-    // handle response
-  });
-}
+    function sendChatMessage(message, file) {
+        const token = localStorage.getItem('token');
+        const teacherId = localStorage.getItem('teacherId');
+        const payload = {
+            teacherId,
+            message,
+            file
+        };
+        fetch('/api/chats', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            // handle response
+        });
+    }
 
 })();
