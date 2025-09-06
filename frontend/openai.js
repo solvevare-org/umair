@@ -39,7 +39,7 @@ async function extractImageText(filePath) {
   return text.trim();
 }
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_KEY = "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";
 if (!OPENAI_API_KEY) {
   console.warn("⚠️ OPENAI_API_KEY not set. Create .env with OPENAI_API_KEY=sk-...");
 }
