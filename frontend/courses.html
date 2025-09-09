@@ -289,7 +289,7 @@
           return;
         }
         try {
-          const res = await fetch(`http://31.97.41.27:3004/api/courses?teacherId=${teacherId}`);
+          const res = await fetch(`http://localhost:3004/api/courses?teacherId=${teacherId}`);
           const data = await res.json();
           const list = document.getElementById('courses-list');
           list.innerHTML = '';
@@ -330,7 +330,7 @@
         const worksheets = document.getElementById('courseWorksheets').value;
         const status = document.getElementById('courseStatus').value;
         try {
-          const res = await fetch('http://31.97.41.27:3004/api/courses', {
+          const res = await fetch('http://localhost:3004/api/courses', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, students, status, teacherId })
